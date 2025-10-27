@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     console.log('Conversation mode:', conversationMode);
     console.log('System prompt:', systemPrompt.substring(0, 100) + '...');
     
-    // Calculate max_completion_tokens based on conversation mode and verbosity
+    // Calculate max_output_tokens based on conversation mode and verbosity
     const getMaxCompletionTokens = (
       mode: ConversationMode,
       verbosity: Verbosity
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
         verbosity: verbosity
       },
       // @ts-ignore - Token limit parameter
-      max_completion_tokens: maxCompletionTokens,
+      max_output_tokens: maxCompletionTokens,
     };
 
     // Add previous_response_id if provided
