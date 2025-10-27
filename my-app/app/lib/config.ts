@@ -1,4 +1,4 @@
-import type { ConfigOption, ReasoningEffort, Verbosity } from './types';
+import type { ConfigOption, ReasoningEffort, Verbosity, TokenLimits } from './types';
 
 /**
  * GPT-5 Configuration
@@ -15,6 +15,25 @@ export const GPT5_CONFIG = {
   
   // Token limits
   maxOutputTokens: 16000,
+  
+  // Dynamic token limits based on conversation mode and verbosity
+  TOKEN_LIMITS: {
+    quick: {
+      low: 800,
+      medium: 1200,
+      high: 1800,
+    },
+    detailed: {
+      low: 1500,
+      medium: 2500,
+      high: 3500,
+    },
+    followup: {
+      low: 400,
+      medium: 600,
+      high: 800,
+    },
+  } as TokenLimits,
   
   // Streaming options
   streamOptions: {

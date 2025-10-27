@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 import { getExpertPrompt, type ExpertType } from '@/app/lib/prompts';
+import { GPT5_CONFIG } from '@/app/lib/config';
+import type { Verbosity, ConversationMode } from '@/app/lib/types';
 
 // GPT-5 parameter types
 type ReasoningEffort = 'minimal' | 'low' | 'medium' | 'high';
-type Verbosity = 'low' | 'medium' | 'high';
 
 // Initialize OpenAI client with API key from environment
 const client = new OpenAI({ 
@@ -25,7 +26,8 @@ export async function POST(req: Request) {
       messages,
       previous_response_id,
       reasoningEffort = 'low',
-      verbosity = 'medium'
+      verbosity = 'medium',
+      conversationMode = 'initial' as ConversationMode
     } = body;
 
     // Validation
@@ -59,7 +61,32 @@ export async function POST(req: Request) {
     const systemPrompt = getExpertPrompt('marketer');
     console.log('Using marketer expert');
     console.log('GPT-5 settings - Reasoning:', reasoningEffort, 'Verbosity:', verbosity);
+    console.log('Conversation mode:', conversationMode);
     console.log('System prompt:', systemPrompt.substring(0, 100) + '...');
+    
+    // Calculate max_completion_tokens based on conversation mode and verbosity
+    const getMaxCompletionTokens = (
+      mode: ConversationMode,
+      verbosity: Verbosity
+    ): number => {
+      if (mode === 'followup') {
+        return GPT5_CONFIG.TOKEN_LIMITS.followup[verbosity];
+      }
+      // For initial messages, detect if it's detailed mode based on user's question
+      const userMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
+      const isDetailedMode = userMessage.includes('step-by-step') || 
+                            userMessage.includes('detailed') || 
+                            userMessage.includes('plan') ||
+                            userMessage.includes('guide');
+      
+      if (isDetailedMode) {
+        return GPT5_CONFIG.TOKEN_LIMITS.detailed[verbosity];
+      }
+      return GPT5_CONFIG.TOKEN_LIMITS.quick[verbosity];
+    };
+    
+    const maxCompletionTokens = getMaxCompletionTokens(conversationMode, verbosity);
+    console.log('Max completion tokens:', maxCompletionTokens);
 
     // Call GPT-5 using OpenAI SDK's Responses API
     console.log('Calling OpenAI GPT-5 Responses API');
@@ -88,6 +115,8 @@ export async function POST(req: Request) {
       text: {
         verbosity: verbosity
       },
+      // @ts-ignore - Token limit parameter
+      max_completion_tokens: maxCompletionTokens,
     };
 
     // Add previous_response_id if provided
