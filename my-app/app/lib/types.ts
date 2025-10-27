@@ -8,9 +8,6 @@ export type ReasoningEffort = 'minimal' | 'low' | 'medium' | 'high';
 // GPT-5 verbosity levels
 export type Verbosity = 'low' | 'medium' | 'high';
 
-// Conversation mode tracking
-export type ConversationMode = 'initial' | 'followup';
-
 // Expert types available in the system
 export type ExpertType = 'marketer';
 
@@ -37,24 +34,5 @@ export interface ConfigOption<T> {
   value: T;
   label: string;
   description: string;
-}
-
-// Token limits configuration
-export interface TokenLimits {
-  quick: {
-    low: number;
-    medium: number;
-    high: number;
-  };
-  detailed: {
-    low: number;
-    medium: number;
-    high: number;
-  };
-  followup: {
-    low: number;
-    medium: number;
-    high: number;
-  };
 }
 

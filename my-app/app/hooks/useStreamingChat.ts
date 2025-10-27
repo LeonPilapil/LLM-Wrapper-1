@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import type { ConversationMode } from '../lib/types';
 
 interface Message {
   id: string;
@@ -28,7 +27,6 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [conversationMode, setConversationMode] = useState<ConversationMode>('initial');
   const streamingMessageRef = useRef<Message | null>(null);
 
   const addMessage = useCallback((message: Omit<Message, 'id' | 'timestamp'>) => {
@@ -91,9 +89,6 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
       const lastAssistantMessage = messages
         .filter(m => m.role === 'assistant' && m.responseId)
         .pop();
-      
-      // Determine if this is a follow-up conversation
-      const isFollowup = conversationMode === 'followup' || lastAssistantMessage !== undefined;
 
       // Create streaming assistant message
       const assistantMessage = addMessage({
@@ -118,7 +113,6 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
           expertType,
           reasoningEffort,
           verbosity,
-          conversationMode: isFollowup ? 'followup' : 'initial',
         }),
       });
 
@@ -131,15 +125,6 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
       
       // Simulate streaming by updating content progressively
       const fullContent = data.text;
-      
-      // Validate response length for follow-ups
-      if (isFollowup) {
-        const wordCount = fullContent.split(/\s+/).length;
-        if (wordCount > 600) {
-          console.warn(`Follow-up response is ${wordCount} words (recommended max: 350)`);
-        }
-      }
-      
       const words = fullContent.split(' ');
       let currentContent = '';
       
@@ -149,11 +134,6 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
         
         // Small delay to simulate streaming
         await new Promise(resolve => setTimeout(resolve, 50));
-      }
-      
-      // After first assistant response, mark conversation as follow-up
-      if (conversationMode === 'initial') {
-        setConversationMode('followup');
       }
 
       // Update the assistant message with the response ID for chaining
@@ -179,12 +159,11 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
       finalizeStreamingMessage();
       options.onStreamingEnd?.();
     }
-    }, [messages, isLoading, conversationMode, addMessage, updateStreamingMessage, finalizeStreamingMessage, options]);
+  }, [messages, isLoading, addMessage, updateStreamingMessage, finalizeStreamingMessage, options]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     streamingMessageRef.current = null;
-    setConversationMode('initial');
   }, []);
 
   // Cleanup function to reset streaming state
