@@ -117,7 +117,23 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        // Try to parse as JSON, fall back to plain text if it fails
+        let error: any;
+        const contentType = response.headers.get('content-type');
+        
+        try {
+          if (contentType && contentType.includes('application/json')) {
+            error = await response.json();
+          } else {
+            const text = await response.text();
+            error = { error: text || 'Failed to get response' };
+          }
+        } catch (parseError) {
+          // If JSON parsing fails, try to get plain text
+          const text = await response.text();
+          error = { error: text || 'Failed to get response' };
+        }
+        
         throw new Error(error.details || error.error || 'Failed to get response');
       }
 
