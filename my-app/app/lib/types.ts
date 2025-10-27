@@ -9,7 +9,7 @@ export type ReasoningEffort = 'minimal' | 'low' | 'medium' | 'high';
 export type Verbosity = 'low' | 'medium' | 'high';
 
 // Expert types available in the system
-export type ExpertType = 'designer' | 'analyst' | 'writer' | 'product-manager' | 'marketer';
+export type ExpertType = 'marketer';
 
 // GPT-5 configuration settings
 export interface GPT5Settings {
