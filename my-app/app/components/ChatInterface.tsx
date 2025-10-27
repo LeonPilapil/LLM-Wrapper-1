@@ -110,28 +110,28 @@ export function ChatInterface({
 
   const exampleQuestions = [
     {
-      question: "How can I improve my conversion rate?",
-      category: "Marketing Strategy",
-      onClick: () => sendMessage("How can I improve my conversion rate?", expertType, reasoningEffort, verbosity),
-      'data-agent-hook': 'example-conversion',
+      question: "How do I launch my new product successfully?",
+      category: "Product Launch",
+      onClick: () => sendMessage("How do I launch my new product successfully?", expertType, reasoningEffort, verbosity),
+      'data-agent-hook': 'example-product-launch',
     },
     {
-      question: "What makes a great user onboarding flow?",
-      category: "UX/UI Design",
-      onClick: () => sendMessage("What makes a great user onboarding flow?", expertType, reasoningEffort, verbosity),
-      'data-agent-hook': 'example-onboarding',
+      question: "What's the best way to acquire my first 100 customers?",
+      category: "Customer Acquisition",
+      onClick: () => sendMessage("What's the best way to acquire my first 100 customers?", expertType, reasoningEffort, verbosity),
+      'data-agent-hook': 'example-customer-acquisition',
     },
     {
-      question: "Help me prioritize features for Q1",
-      category: "Product Management",
-      onClick: () => sendMessage("Help me prioritize features for Q1", expertType, reasoningEffort, verbosity),
-      'data-agent-hook': 'example-prioritization',
+      question: "Help me create a content marketing strategy",
+      category: "Content Strategy",
+      onClick: () => sendMessage("Help me create a content marketing strategy", expertType, reasoningEffort, verbosity),
+      'data-agent-hook': 'example-content-strategy',
     },
     {
-      question: "Write compelling copy for my landing page",
-      category: "Content Writing",
-      onClick: () => sendMessage("Write compelling copy for my landing page", expertType, reasoningEffort, verbosity),
-      'data-agent-hook': 'example-copywriting',
+      question: "How can I improve my Facebook ads performance?",
+      category: "Paid Advertising",
+      onClick: () => sendMessage("How can I improve my Facebook ads performance?", expertType, reasoningEffort, verbosity),
+      'data-agent-hook': 'example-paid-ads',
     },
   ];
 
