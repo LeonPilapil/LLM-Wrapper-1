@@ -117,23 +117,11 @@ export function useStreamingChat(options: StreamingChatOptions = {}) {
       });
 
       if (!response.ok) {
-        let error;
-        try {
-          error = await response.json();
-        } catch (e) {
-          const text = await response.text();
-          throw new Error(`API Error: ${text}`);
-        }
+        const error = await response.json();
         throw new Error(error.details || error.error || 'Failed to get response');
       }
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        const text = await response.text();
-        throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
-      }
+      const data = await response.json();
       
       // Simulate streaming by updating content progressively
       const fullContent = data.text;
