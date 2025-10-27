@@ -61,11 +61,11 @@ export async function POST(req: Request) {
     console.log('GPT-5 settings - Reasoning:', reasoningEffort, 'Verbosity:', verbosity);
     console.log('System prompt:', systemPrompt.substring(0, 100) + '...');
 
-    // Call GPT-5 using OpenAI SDK's Responses API
-    console.log('Calling OpenAI GPT-5 Responses API');
+    // Call OpenAI Chat Completions API
+    console.log('Calling OpenAI Chat Completions API');
     
-    // Format input for Responses API
-    const input = [
+    // Format messages for Chat Completions API
+    const chatMessages = [
       { role: 'system' as const, content: systemPrompt },
       { role: 'system' as const, content: 'IMPORTANT: You MUST format your entire response in Markdown format for proper rendering.' },
       ...messages.map((msg: any) => ({
@@ -74,34 +74,18 @@ export async function POST(req: Request) {
       }))
     ];
     
-    // Prepare request parameters for Responses API
-    const requestParams: any = {
-      model: 'gpt-5',
-      input: input,
-      store: true, // Required for response chaining
-      // GPT-5 parameters with correct Responses API format
-      // @ts-ignore - These parameters may not be in SDK types yet
-      reasoning: {
-        effort: reasoningEffort
-      },
-      // @ts-ignore
-      text: {
-        verbosity: verbosity
-      },
-    };
+    // Use gpt-4o-mini or gpt-4-turbo (gpt-5 doesn't exist)
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: chatMessages,
+      temperature: verbosity === 'high' ? 0.9 : verbosity === 'medium' ? 0.7 : 0.5,
+      max_tokens: 4000,
+    });
 
-    // Add previous_response_id if provided
-    if (previous_response_id) {
-      requestParams.previous_response_id = previous_response_id;
-      console.log('Using previous_response_id:', previous_response_id);
-    }
-
-    const response = await client.responses.create(requestParams);
-
-    console.log('GPT-5 Response received');
+    console.log('OpenAI Response received');
     
-    // Return the response text and ID
-    const responseText = response.output_text || 'No response generated';
+    // Return the response text
+    const responseText = response.choices[0]?.message?.content || 'No response generated';
     return NextResponse.json({ 
       text: responseText,
       role: 'assistant',
@@ -117,16 +101,15 @@ export async function POST(req: Request) {
     let errorDetails = error instanceof Error ? error.message : 'Unknown error';
     
     if (error instanceof Error) {
-      // Check for GPT-5 specific errors
-      if (error.message.includes('model') && error.message.includes('gpt-5')) {
-        errorMessage = 'GPT-5 model access error';
-        errorDetails = 'Unable to access GPT-5. Please check your API key has GPT-5 access.';
-      } else if (error.message.includes('reasoning_effort') || error.message.includes('verbosity')) {
-        errorMessage = 'Invalid GPT-5 parameter';
-        errorDetails = error.message;
+      // Check for OpenAI specific errors
+      if (error.message.includes('model')) {
+        errorMessage = 'Model access error';
+        errorDetails = 'Unable to access the AI model. Please check your API key.';
       } else if (error.message.includes('API key')) {
         errorMessage = 'API key error';
-        errorDetails = 'Please ensure OPENAI_API_KEY is set in your .env.local file';
+        errorDetails = 'Please ensure OPENAI_API_KEY is set in your environment variables';
+      } else {
+        errorDetails = error.message;
       }
     }
     
